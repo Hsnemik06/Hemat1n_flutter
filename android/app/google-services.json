@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "148134557970",
+    "project_id": "hematin-49f87",
+    "storage_bucket": "hematin-49f87.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:148134557970:android:523fb970cd1f0fc4cb5bcb",
+        "android_client_info": {
+          "package_name": "com.hematin.iot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "148134557970-1og6qgl6t9ogg4qoa0lta6ao0ahn0pkk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hematin.iot",
+            "certificate_hash": "5a8b1b82275193ee03981fd65b07d9c2fccc859d"
+          }
+        },
+        {
+          "client_id": "148134557970-mfuh6qp6ji1i3laei746rdkeu8q122pe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKr53VOrW6sARKvZyte7GSjX-eOUk5rkY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "148134557970-mfuh6qp6ji1i3laei746rdkeu8q122pe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
