@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class HomepageStyle {
 
   // ===== COLORS =====
-  static const Color primaryGreen = Color(0xFF38D45A);
-  static const Color darkGreenText = Color(0xFF006D5B);
+  static const Color primaryGreen = Color.fromARGB(255, 145, 214, 25);
+  static const Color darkGreenText = Color.fromARGB(255, 101, 193, 21);
   static const Color backgroundGrey = Color(0xFFF5F5F5);
 
   // ===== SPACING =====

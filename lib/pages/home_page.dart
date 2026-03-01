@@ -11,14 +11,22 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: HomepageStyle.backgroundGrey,
-      body: SafeArea(
-        child: Column(
-          children: const [
-            HomepageHeader(),
-            Expanded(child: HomepageBody()),
-          ],
-        ),
+
+      body: Column(
+        children: const [
+          // Header boleh sampai atas layar
+          HomepageHeader(),
+
+          // Body tetap aman dari notch
+          Expanded(
+            child: SafeArea(
+              top: false,
+              child: HomepageBody(),
+            ),
+          ),
+        ],
       ),
+
       bottomNavigationBar: const HomepageBottomNav(),
     );
   }

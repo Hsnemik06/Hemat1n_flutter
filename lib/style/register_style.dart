@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'app_style.dart';
 
 class RegisterColors {
   static const background = Colors.white;
-  static const accent = AppColors.secondary;
+  static const accent = Color.fromARGB(255, 145, 214, 25);
 }
 
 class RegisterTextStyles {
@@ -51,7 +50,7 @@ class RegisterInputStyles {
 
 class RegisterButtonStyles {
   static final signUpButton = ElevatedButton.styleFrom(
-    backgroundColor: RegisterColors.accent,
+    backgroundColor: const Color.fromARGB(255, 145, 214, 25),
     padding: const EdgeInsets.symmetric(vertical: 15),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(15),
@@ -66,7 +65,7 @@ class RegisterDecorations {
   );
 
   static const bottomAccent = BoxDecoration(
-    color: RegisterColors.accent,
+    color: Color.fromARGB(255, 145, 214, 25),
     borderRadius: BorderRadius.only(
       topLeft: Radius.circular(10),
       topRight: Radius.circular(10),

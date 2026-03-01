@@ -1,3 +1,4 @@
+// homepage_bottom_nav.dart
 import 'package:flutter/material.dart';
 import '../pages/profile_page.dart';
 
@@ -9,7 +10,7 @@ class HomepageBottomNav extends StatelessWidget {
     return Container(
       height: 75,
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 56, 212, 90),
+        color: const Color.fromARGB(255, 145, 214, 25),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25),
           topRight: Radius.circular(25),

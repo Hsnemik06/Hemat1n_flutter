@@ -6,29 +6,34 @@ class HomepageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double statusBarHeight = MediaQuery.of(context).padding.top;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: HomepageStyle.horizontalPadding,
-        vertical: 15,
-      ),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: HomepageStyle.primaryGreen,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Image.asset(
-            "assets/images/Hematin_Teks.png",
-            height: 50,
-          ),
-
-          const CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.black,
-            child: Icon(Icons.person, color: Colors.white),
-          ),
-        ],
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: statusBarHeight * 0.8, // 🔥 lebih pendek dari default
+          left: HomepageStyle.horizontalPadding,
+          right: HomepageStyle.horizontalPadding,
+          bottom: 15,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Image.asset(
+              "assets/images/Hem_Log.png",
+              height: 50, // tetap besar
+            ),
+            const CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.black,
+              child: Icon(Icons.person, color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }
