@@ -1,8 +1,9 @@
+//register.dart
 import 'package:flutter/material.dart';
 import '../style/register_style.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_page.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -152,58 +153,62 @@ class _RegisterPageState extends State<RegisterPage>
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        try {
-                          final response = await http.post(
-                            Uri.parse("https://hemat1n-production.up.railway.app/api/register"),
-                            headers: {"Content-Type": "application/json"},
-                            body: jsonEncode({
-                              "name": "User",
-                              "email": _emailController.text,
-                              "password": _passwordController.text,
-                            }),
-                          );
+  if (_formKey.currentState!.validate()) {
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-                          print('Status code: ${response.statusCode}');
-                          print('Response body: ${response.body}');
+      User? user = userCredential.user;
 
-                          if (response.statusCode == 200 || response.statusCode == 201) {
-                            // pastikan body JSON valid
-                            final data = jsonDecode(response.body);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(data["message"])),
-                              );
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (_) => const LoginPage()),
-                              );
-                            }
-                          } else {
-                            // body bisa berupa HTML error, jadi jangan decode dulu
-                            String message;
-                            try {
-                              final data = jsonDecode(response.body);
-                              message = data["message"].toString();
-                            } catch (_) {
-                              message = "Terjadi kesalahan server";
-                            }
+      // Simpan data tambahan ke Firestore (opsional tapi direkomendasikan)
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'email': user.email,
+          'created_at': Timestamp.now(),
+        });
+      }
 
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(message)),
-                              );
-                            }
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Terjadi error: $e")),
-                            );
-                          }
-                        }
-                      }
-                    },
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Register berhasil")),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String message = "Register gagal";
+
+      if (e.code == 'email-already-in-use') {
+        message = "Email sudah digunakan";
+      } else if (e.code == 'invalid-email') {
+        message = "Format email salah";
+      } else if (e.code == 'weak-password') {
+        message = "Password terlalu lemah";
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Terjadi kesalahan")),
+        );
+      }
+    }
+  }
+},
                           style: RegisterButtonStyles.signUpButton,
                           child: const Text("Sign Up"),
                         ),

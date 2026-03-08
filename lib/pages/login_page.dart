@@ -4,8 +4,6 @@ import '../style/login_style.dart';
 import 'register_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -212,134 +210,92 @@ class _LoginPageState extends State<LoginPage>
   }
 }
 
-// ======================
-// AuthService
-// ======================
-class AuthService {
-  static Future<void> signInWithGoogle(BuildContext context) async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // user batal login
+            // ======================
+            // AuthService
+            // ======================
+                class AuthService {
 
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+            // =========================
+            // LOGIN EMAIL & PASSWORD
+            // =========================
+                  static Future<void> loginWithEmail(
+              BuildContext context, String email, String password) async {
 
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+            try {
+              await FirebaseAuth.instance.signInWithEmailAndPassword(
+                email: email,
+                password: password,
+              );
 
-      User? user = userCredential.user;
-      if (user == null) return;
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Login berhasil")),
+                );
+              }
 
-      String? idToken = await user.getIdToken();
-      if (idToken == null) return;
+            } on FirebaseAuthException catch (e) {
+              String message = "Login gagal";
 
-      // POST ke backend Laravel
-      final response = await http.post(
-        Uri.parse("https://hemat1n-production.up.railway.app/api/login-google"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"token": idToken}),
-      );
+              if (e.code == 'user-not-found') {
+                message = "User tidak ditemukan";
+              } else if (e.code == 'wrong-password') {
+                message = "Password salah";
+              }
 
-      print("Status code: ${response.statusCode}");
-      print("Response body: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['status'] == 'success'
-                ? "Login berhasil"
-                : data['message'] ?? "Login gagal")),
-          );
-        }
-
-        // jika sukses, pindah ke HomePage
-        if (data['status'] == 'success' && context.mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HomePage()),
-          );
-        }
-      } else {
-        String message;
-        try {
-          final data = jsonDecode(response.body);
-          message = data['message'] ?? "Login gagal";
-        } catch (_) {
-          message = "Terjadi kesalahan server";
-        }
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
-          );
-        }
-      }
-    } catch (e) {
-      print("Error Google Sign-In: $e");
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Terjadi kesalahan saat login")),
-        );
-      }
-    }
-  }
-
-  // contoh tambahan login email/password
-  static Future<void> loginWithEmail(
-      BuildContext context, String email, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse("https://hemat1n-production.up.railway.app/api/login"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email, "password": password}),
-      );
-
-      print("Status code: ${response.statusCode}");
-      print("Response body: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['status'] == 'success'
-                ? "Login berhasil"
-                : data['message'] ?? "Login gagal")),
-          );
-
-          if (data['status'] == 'success') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomePage()),
-            );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(message)),
+                );
+              }
+            }
           }
-        }
-      } else {
-        String message;
-        try {
-          final data = jsonDecode(response.body);
-          message = data['message'] ?? "Login gagal";
-        } catch (_) {
-          message = "Terjadi kesalahan server";
-        }
+                  // =========================
+                  // GOOGLE SIGN IN
+                  // =========================
+                  static Future<void> signInWithGoogle(BuildContext context) async {
+                    try {
+                      final GoogleSignInAccount? googleUser =
+                          await GoogleSignIn().signIn();
 
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
-          );
-        }
-      }
-    } catch (e) {
-      print("Error Login: $e");
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Terjadi kesalahan saat login")),
-        );
-      }
-    }
-  }
-}
+                      if (googleUser == null) return;
+
+                      final googleAuth = await googleUser.authentication;
+
+                      final credential = GoogleAuthProvider.credential(
+                        accessToken: googleAuth.accessToken,
+                        idToken: googleAuth.idToken,
+                      );
+
+                      await FirebaseAuth.instance.signInWithCredential(credential);
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Login Google berhasil")),
+                        );
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const HomePage()),
+                        );
+                      }
+                    } on FirebaseAuthException catch (e) {
+                      String message = "Login Google gagal";
+
+                      if (e.code == 'account-exists-with-different-credential') {
+                        message = "Email sudah digunakan dengan metode lain";
+                      }
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(message)),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Terjadi kesalahan saat login")),
+                        );
+                      }
+                    }
+                  }
+                }
