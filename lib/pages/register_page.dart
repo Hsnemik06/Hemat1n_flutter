@@ -164,15 +164,18 @@ class _RegisterPageState extends State<RegisterPage>
       User? user = userCredential.user;
 
       // Simpan data tambahan ke Firestore (opsional tapi direkomendasikan)
-      if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set({
-          'email': user.email,
-          'created_at': Timestamp.now(),
-        });
-      }
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .set({
+            'email': user.email,
+            'created_at': Timestamp.now(),
+          });
+        }
+
+        // logout agar kembali ke login
+        await FirebaseAuth.instance.signOut();
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
