@@ -1,24 +1,12 @@
-// profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../style/profile_style.dart';
 import 'login_page.dart';
-
-// Contoh service simpan data (sesuaikan dengan backend kamu)
-Future<void> saveProfileToDatabase({
-  required String username,
-  required String gender,
-  required String birthday,
-}) async {
-  // Panggil API backend kamu untuk update profile
-  // Contoh pseudo-code:
-  // await http.post(Uri.parse("https://api.example.com/updateProfile"),
-  //     body: {"username": username, "gender": gender, "birthday": birthday});
-  await Future.delayed(const Duration(seconds: 1)); // simulasi delay
-  debugPrint("Data saved: $username | $gender | $birthday");
-}
+import '../components/homepage_bottom_nav.dart'; // <- import bottom navbar
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -33,8 +21,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final genderController = TextEditingController();
   final birthdayController = TextEditingController();
 
-  // Field readonly awalnya
-  bool _isEditable = false;
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
@@ -42,51 +29,82 @@ class _ProfilePageState extends State<ProfilePage> {
     _loadProfile();
   }
 
+  // LOAD PROFILE
   Future<void> _loadProfile() async {
-    // Ambil data dari database / API
-    // Contoh statik:
-    setState(() {
-      usernameController.text = "Angel Cry";
-      emailController.text = "angel@example.com"; // tidak bisa diedit
-      genderController.text = "Male";
-      birthdayController.text = "01-01-2000";
+    if (user == null) return;
+
+    emailController.text = user!.email ?? "";
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
+
+    if (doc.exists) {
+      final data = doc.data()!;
+      setState(() {
+        usernameController.text = data["username"] ?? "";
+        genderController.text = data["gender"] ?? "";
+        birthdayController.text = data["birthday"] ?? "";
+      });
+    }
+  }
+
+  // SAVE PROFILE
+  Future<void> _saveProfile(String username, String gender, String birthday) async {
+    if (user == null) return;
+
+    await FirebaseFirestore.instance.collection('users').doc(user!.uid).update({
+      "username": username,
+      "gender": gender,
+      "birthday": birthday,
     });
   }
 
-  void onEditProfile() {
-    setState(() {
-      _isEditable = true;
-    });
+  // CONTACT US
+  Future<void> contactUs() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'support@yourapp.com',
+      query: 'subject=Contact Support',
+    );
 
-    // Tampilkan popup untuk edit
+    await launchUrl(emailLaunchUri);
+  }
+
+  // EDIT PROFILE
+  void onEditProfile() {
+    final username = TextEditingController(text: usernameController.text);
+    final gender = TextEditingController(text: genderController.text);
+    final birthday = TextEditingController(text: birthdayController.text);
+
     showDialog(
       context: context,
-      builder: (_) {
-        final editUsername = TextEditingController(text: usernameController.text);
-        final editGender = TextEditingController(text: genderController.text);
-        final editBirthday = TextEditingController(text: birthdayController.text);
-
+      builder: (context) {
         return AlertDialog(
           title: const Text("Edit Profile"),
           content: SingleChildScrollView(
             child: Column(
               children: [
                 TextField(
-                  controller: editUsername,
+                  controller: username,
                   decoration: const InputDecoration(labelText: "Username"),
                 ),
-                TextField(
-                  controller: editGender,
-                  decoration: const InputDecoration(labelText: "Gender"),
-                ),
-                TextField(
-                  controller: editBirthday,
-                  decoration: const InputDecoration(labelText: "Birthday"),
-                ),
+                const SizedBox(height: 10),
                 TextField(
                   controller: emailController,
-                  decoration: const InputDecoration(labelText: "Email (tidak bisa diedit)"),
                   enabled: false,
+                  decoration: const InputDecoration(labelText: "Email"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: gender,
+                  decoration: const InputDecoration(labelText: "Gender"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: birthday,
+                  decoration: const InputDecoration(labelText: "Birthday"),
                 ),
               ],
             ),
@@ -94,28 +112,24 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Batal"),
+              child: const Text("Cancel"),
             ),
             ElevatedButton(
               onPressed: () async {
-                // Simpan ke controller
-                setState(() {
-                  usernameController.text = editUsername.text;
-                  genderController.text = editGender.text;
-                  birthdayController.text = editBirthday.text;
-                });
+                usernameController.text = username.text;
+                genderController.text = gender.text;
+                birthdayController.text = birthday.text;
 
-                // Simpan ke database
-                await saveProfileToDatabase(
-                  username: editUsername.text,
-                  gender: editGender.text,
-                  birthday: editBirthday.text,
+                await _saveProfile(username.text, gender.text, birthday.text);
+
+                if (!mounted) return;
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Profile berhasil disimpan")),
                 );
-
-                Navigator.pop(context); // tutup popup
-                setState(() => _isEditable = false);
               },
-              child: const Text("Simpan"),
+              child: const Text("Save"),
             ),
           ],
         );
@@ -123,51 +137,51 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // LOGOUT
   void onLogout() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      await GoogleSignIn().signOut();
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-    } catch (e) {
-      debugPrint("Logout error: $e");
-    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
 
     if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
+
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginPage()),
       (route) => false,
     );
   }
 
   @override
-  void dispose() {
-    usernameController.dispose();
-    emailController.dispose();
-    genderController.dispose();
-    birthdayController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final photoUrl = user?.photoURL;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text("Profile"),
+        title: const Text(
+          "Profile",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
+      backgroundColor: Colors.grey[200],
+
+      // ✅ Bottom Navbar, highlight Profile (index 2)
+      bottomNavigationBar: const HomepageBottomNav(currentIndex: 2),
+
       body: ProfileUI(
+        photoUrl: photoUrl,
         usernameController: usernameController,
         emailController: emailController,
         genderController: genderController,
         birthdayController: birthdayController,
         onEditProfile: onEditProfile,
         onLogout: onLogout,
+        onContactUs: contactUs,
       ),
     );
   }

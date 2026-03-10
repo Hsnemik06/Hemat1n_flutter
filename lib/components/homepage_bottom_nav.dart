@@ -1,9 +1,12 @@
 // homepage_bottom_nav.dart
 import 'package:flutter/material.dart';
 import '../pages/profile_page.dart';
+import '../pages/data_page.dart';
 
 class HomepageBottomNav extends StatelessWidget {
-  const HomepageBottomNav({super.key});
+  final int currentIndex; // 0 = Home, 1 = Data, 2 = Profile
+
+  const HomepageBottomNav({super.key, required this.currentIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -20,25 +23,39 @@ class HomepageBottomNav extends StatelessWidget {
             color: Colors.black.withOpacity(0.08),
             blurRadius: 20,
             offset: const Offset(0, -5),
-          )
+          ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          const _NavItem(
+          // Home Button
+          _NavItem(
             icon: Icons.home,
-            isActive: true,
-          ),
-          const _NavItem(
-            icon: Icons.description,
-            isActive: false,
+            isActive: currentIndex == 0,
+            onTap: () {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
           ),
 
-          // ✅ Profile Button
+          // Data Button
+          _NavItem(
+            icon: Icons.description,
+            isActive: currentIndex == 1,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DataPage(),
+                ),
+              );
+            },
+          ),
+
+          // Profile Button
           _NavItem(
             icon: Icons.person,
-            isActive: false,
+            isActive: currentIndex == 2,
             onTap: () {
               Navigator.push(
                 context,
@@ -89,9 +106,10 @@ class _NavItem extends StatelessWidget {
                   : Colors.transparent,
               shape: BoxShape.circle,
             ),
-          )
+          ),
         ],
       ),
     );
+  
   }
 }

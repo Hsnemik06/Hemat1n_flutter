@@ -5,8 +5,22 @@ import '../components/homepage_body.dart';
 import '../components/homepage_bottom_nav.dart';
 import '../style/homepage_style.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+
+  List<String> devices = [];
+
+  void addDevice(String name) {
+    setState(() {
+      devices.add(name);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,21 +28,22 @@ class HomePage extends StatelessWidget {
       backgroundColor: HomepageStyle.backgroundGrey,
 
       body: Column(
-        children: const [
-          // Header boleh sampai atas layar
-          HomepageHeader(),
+        children: [
+          const HomepageHeader(),
 
-          // Body tetap aman dari notch
           Expanded(
             child: SafeArea(
               top: false,
-              child: HomepageBody(),
+              child: HomepageBody(
+                devices: devices,
+                onAddDevice: addDevice,
+              ),
             ),
           ),
         ],
       ),
 
-      bottomNavigationBar: const HomepageBottomNav(),
+      bottomNavigationBar: const HomepageBottomNav(currentIndex: 0),
     );
   }
 }
