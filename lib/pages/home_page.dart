@@ -1,8 +1,8 @@
 //home_page.dart
 import 'package:flutter/material.dart';
-import '../components/homepage_header.dart';
-import '../components/homepage_body.dart';
-import '../components/homepage_bottom_nav.dart';
+import '../homepage/homepage_header.dart';
+import '../homepage/homepage_body.dart';
+import '../homepage/homepage_bottom_nav.dart';
 import '../style/homepage_style.dart';
 
 class HomePage extends StatefulWidget {

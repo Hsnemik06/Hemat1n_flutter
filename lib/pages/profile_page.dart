@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../style/profile_style.dart';
 import 'login_page.dart';
-import '../components/homepage_bottom_nav.dart'; // <- import bottom navbar
+import '../homepage/homepage_bottom_nav.dart'; // <- import bottom navbar
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

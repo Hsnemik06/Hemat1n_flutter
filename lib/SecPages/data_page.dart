@@ -4,8 +4,8 @@ import '../controllers/data_controller.dart';
 import '../components/usage_card.dart'; // ✅ import UsageCard
 import '../components/control_panel.dart';
 import '../components/usage_chart.dart';
-import '../components/homepage_bottom_nav.dart';
-import '../components/homepage_header.dart';
+import '../homepage/homepage_bottom_nav.dart';
+import '../homepage/homepage_header.dart';
 
 class DataPage extends StatelessWidget {
   const DataPage({super.key});

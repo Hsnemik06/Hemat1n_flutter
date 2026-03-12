@@ -1,7 +1,7 @@
 // homepage_bottom_nav.dart
 import 'package:flutter/material.dart';
 import '../pages/profile_page.dart';
-import '../pages/data_page.dart';
+import '../SecPages/data_page.dart';
 
 class HomepageBottomNav extends StatelessWidget {
   final int currentIndex; // 0 = Home, 1 = Data, 2 = Profile
